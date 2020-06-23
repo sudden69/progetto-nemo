@@ -1,4 +1,4 @@
-package supports;
+package com.example.nemo.supports;
 
 
 public class ResponseMessage {

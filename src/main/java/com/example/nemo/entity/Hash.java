@@ -1,4 +1,4 @@
-package entity;
+package com.example.nemo.entity;
 
 import javax.persistence.*;
 

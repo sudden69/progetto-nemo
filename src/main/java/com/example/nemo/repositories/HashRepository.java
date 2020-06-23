@@ -1,6 +1,6 @@
-package repositories;
+package com.example.nemo.repositories;
 
-import entity.Hash;
+import com.example.nemo.entity.Hash;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.*;
 

@@ -1,15 +1,14 @@
-package restControllers;
+package com.example.nemo.controller;
 
-import entity.Hash;
+import com.example.nemo.entity.Hash;
+import com.example.nemo.services.HashService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import services.HashService;
-import supports.ResponseMessage;
+import com.example.nemo.supports.ResponseMessage;
 
-//import javax.validation.Valid;
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/hashes")
@@ -19,7 +18,7 @@ public class HashController {
     private HashService hashService;
 
     @PostMapping
-    public ResponseEntity create (@RequestBody @Validated Hash hash){
+    public ResponseEntity create (@RequestBody @Valid Hash hash){
         hashService.addUrl(hash);
         return new ResponseEntity<>(new ResponseMessage("Added hash"), HttpStatus.OK);
     }

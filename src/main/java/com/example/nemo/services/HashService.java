@@ -1,9 +1,9 @@
-package services;
+package com.example.nemo.services;
 
-import entity.Hash;
+import com.example.nemo.entity.Hash;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import repositories.HashRepository;
+import com.example.nemo.repositories.HashRepository;
 
 import java.util.Optional;
 
@@ -22,7 +22,10 @@ public class HashService {
 
     public Hash findUrlByHash(String id){
         Optional<Hash> ret = hashRepository.findById(id);
-        return ret.get();
+        if(ret.isPresent())
+            return ret.get();
+        else
+            return null;
     }
 
 }
