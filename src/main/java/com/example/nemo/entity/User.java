@@ -2,27 +2,28 @@ package com.example.nemo.entity;
 
 import javax.persistence.*;
 import java.sql.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 @Entity
-@Table(name = "user")
+//@Table(name = "user")
 
 public class User {
     @Id
-    @Column(name = "id")
+    //@Column(name = "id")
     private int id;
 
     @Basic
-    @Column(name = "name")
+    //@Column(name = "name")
     private String name;
 
     @Basic
-    @Column(name = "email")
+    //@Column(name = "email")
     private String email;
 
     @Basic
-    @Column(name = "creationdate")
-    private Date creationdate;
-
+    //@Column(name = "creationdate")
+    private Date creationDate;
 
     public int getId() {
         return id;
@@ -51,12 +52,12 @@ public class User {
     }
 
 
-    public Date getCreationdate() {
-        return creationdate;
+    public Date getCreationDate() {
+        return creationDate;
     }
 
-    public void setCreationdate(Date creationdate) {
-        this.creationdate = creationdate;
+    public void setCreationDate(Date creationdate) {
+        this.creationDate = creationdate;
     }
 
     @Override
@@ -69,7 +70,7 @@ public class User {
         if (id != user.id) return false;
         if (name != null ? !name.equals(user.name) : user.name != null) return false;
         if (email != null ? !email.equals(user.email) : user.email != null) return false;
-        if (creationdate != null ? !creationdate.equals(user.creationdate) : user.creationdate != null) return false;
+        if (creationDate != null ? !creationDate.equals(user.creationDate) : user.creationDate != null) return false;
 
         return true;
     }
@@ -79,7 +80,7 @@ public class User {
         int result = id;
         result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (email != null ? email.hashCode() : 0);
-        result = 31 * result + (creationdate != null ? creationdate.hashCode() : 0);
+        result = 31 * result + (creationDate != null ? creationDate.hashCode() : 0);
         return result;
     }
 }

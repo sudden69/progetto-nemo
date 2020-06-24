@@ -8,8 +8,6 @@ import com.example.nemo.repositories.HashRepository;
 import javax.transaction.Transactional;
 import java.util.Optional;
 
-// import org.springframework.transaction.annotation.Transactional;
-
 @Service
 public class HashService {
     @Autowired
