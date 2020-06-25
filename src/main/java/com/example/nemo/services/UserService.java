@@ -1,46 +1,43 @@
 package com.example.nemo.services;
 
-import com.example.nemo.entity.Hash;
-import com.example.nemo.entity.User;
-import com.example.nemo.repositories.HashRepository;
+import com.example.nemo.entity.UserEntity;
 import com.example.nemo.repositories.UserRepository;
+import com.example.nemo.supports.exceptions.MailUserAlreadyExistException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
+
 
 @Service
 public class UserService {
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private HashRepository hashRepository;
-    @Transactional
-    public void addUser(User user)
-    {userRepository.save(user);
 
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public UserEntity registerUser(HashMap<String, String> signupRequest) throws MailUserAlreadyExistException {
+        if ( userRepository.existsByEmail(signupRequest.get("email")) ) {
+            throw new MailUserAlreadyExistException();
+        }
+        UserEntity user = new UserEntity();
+        user.setCode(signupRequest.get("code"));
+        user.setFirstName(signupRequest.get("first_name"));
+        user.setLastName(signupRequest.get("last_name"));
+        user.setTelephoneNumber(signupRequest.get("telephone_number"));
+        user.setEmail(signupRequest.get("email"));
+        user.setAddress(signupRequest.get("address"));
+        userRepository.save(user);
+        return user;
     }
 
-    public User findNameByUser(String id)
-    {
-        Optional<User> ret=userRepository.findById(id);
-        if(ret.isPresent())
-            return ret.get();
-        else
-            return null;
+    @Transactional(readOnly = true)
+    public List<UserEntity> getAllUsers() {
+        return userRepository.findAll();
+    }
 
-    }
-    // Qui sto usando un metodo di tipo Hash
-    //
-    public List<Hash> findAllMyUrls(String id)
-    { List <Hash> ret= (List<Hash>) hashRepository.findByUser(id);
-     return ret;
-    }
-    //per l'inserimento probabilmente è conveniente procedere come in HashService
-    //e creare una nuova istanza di Hash. Con questo tipo di associazione si
-    //potrebbe potenzialmente evitare che user diversi vedano lo stesso tinyurl
 
 }

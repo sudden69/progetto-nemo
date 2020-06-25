@@ -12,6 +12,6 @@ import com.example.nemo.supports.ResponseMessage;
 public class HomeController {
     @GetMapping("/")
     public ResponseEntity home() {
-        return new ResponseEntity<>(new ResponseMessage("Added hash"), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseMessage("Benvenuto!!!!!!1111!!!!"), HttpStatus.OK);
     }
 }
