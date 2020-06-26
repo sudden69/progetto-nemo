@@ -40,15 +40,18 @@ public class HashService {
         else
             return null;
     }
-    /*
-    public void makeId()
+
+    public HashEntity makeId(String url)
     {StringBuilder Sb=new StringBuilder(30);
         Sb.append("https://nemoswimmer.it/"); //https si ci voglio credere :P
-        Sb.append(this.url.hashCode());
-        setId(Sb.toString());
+        Sb.append(url.hashCode());
+        HashEntity hash=new HashEntity();
+        hash.setUrl(url);
+        hash.setId(Sb.toString());
+        return hash;
     }
     public int getSize(String url)  //tinyurl lo fa, noi non possiamo essere da meno
     {return url.length();
     }
-    */
+
 }

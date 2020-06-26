@@ -1,6 +1,7 @@
 package com.example.nemo.entity;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -10,6 +11,9 @@ public class UserEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private int id;
+   /* @OneToMany
+    @Column (name ="urlista")
+    private List<HashEntity> urlista ;*/
     @Basic
     @Column(name = "code", nullable = true, length = 70)
     private String code;
@@ -29,6 +33,14 @@ public class UserEntity {
     @Column(name = "address", nullable = true, length = 150)
     private String address;
 
+    /*public void addUrl(HashEntity hash)
+    {
+        this.urlista.add(hash);
+    }
+    public void removeUrl(HashEntity hash)
+    {this.urlista.remove(hash);
+     //per le eccezioni poi vediamo
+    }*/
     public int getId() {
         return id;
     }

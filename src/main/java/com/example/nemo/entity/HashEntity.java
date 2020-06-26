@@ -13,12 +13,12 @@ public class HashEntity {
     @Basic
     @Column(name = "url")
     private String url;
-    /*
-    @ManyToOne
-    @JoinColumn(name = "user")
-    private User user;
-    */
 
+ /*   @ManyToOne
+    @JoinColumn(name = "user")
+    private UserEntity user;
+
+*/
     public String getId() {
         return id;
     }
@@ -26,17 +26,18 @@ public class HashEntity {
     public void setId(String id) {
         this.id = id;
     }
-    /*
-    public User getUser()
+
+  /*  public UserEntity getUser()
     {
         return user;
     }
 
-    public void setUser(User user)
+    public void setUser(UserEntity user)
     {
         this.user=user;
     }
-    */
+
+   */
     public String getUrl() {
         return url;
     }
@@ -64,6 +65,7 @@ public class HashEntity {
         result = 31 * result + (url != null ? url.hashCode() : 0);
         return result;
     }
+
 
 
 }

@@ -24,6 +24,23 @@ public class HashController {
         return new ResponseEntity<>(new ResponseMessage("Added hash"), HttpStatus.OK);
     }
 
+//questo restituisce bad request
+
+    @PostMapping("/make")
+    public ResponseEntity makeIdByAttribute(@RequestParam @Valid String url )
+    {HashEntity hash=hashService.makeId(url);
+        hashService.addUrl(hash);
+        return new ResponseEntity<>(new ResponseMessage("Id created"),HttpStatus.OK);
+    }
+
+    //questo invece funziona
+
+    @PostMapping("/{url}")
+    public ResponseEntity makeId(@PathVariable("url") String url )
+    {HashEntity hash=hashService.makeId(url);
+     hashService.addUrl(hash);
+     return new ResponseEntity<>(new ResponseMessage("Id created"),HttpStatus.OK);
+    }
     @GetMapping("/{id}")
     public ResponseEntity getByHash(@PathVariable("id") String id){
         HashEntity hash = hashService.findUrlByHash(id);

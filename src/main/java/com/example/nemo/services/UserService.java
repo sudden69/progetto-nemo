@@ -1,5 +1,6 @@
 package com.example.nemo.services;
 
+import com.example.nemo.entity.HashEntity;
 import com.example.nemo.entity.UserEntity;
 import com.example.nemo.repositories.UserRepository;
 import com.example.nemo.supports.exceptions.MailUserAlreadyExistException;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -34,9 +36,24 @@ public class UserService {
         return user;
     }
 
+    /*@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void shorten(String url, UserEntity user)
+    {HashService hashing=new HashService();
+        HashEntity hash= hashing.makeId(url);
+        user.addUrl(hash);
+    }*/
+
     @Transactional(readOnly = true)
     public List<UserEntity> getAllUsers() {
         return userRepository.findAll();
+    }
+
+    @Transactional (readOnly= false)
+    public UserEntity getById(Integer id)
+    {Optional<UserEntity> Optuser =userRepository.findById(id);
+     if(Optuser.isPresent())
+         return Optuser.get();
+     else return null;
     }
 
 
