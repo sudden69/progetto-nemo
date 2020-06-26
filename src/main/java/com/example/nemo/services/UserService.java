@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 
 @Service
@@ -43,6 +44,11 @@ public class UserService {
         user.addUrl(hash);
     }*/
 
+    public void addHash(UserEntity user,HashEntity hash){
+        Set<HashEntity> a = user.getHashes();
+        a.add(hash);
+        user.setHashes(a);
+    }
     @Transactional(readOnly = true)
     public List<UserEntity> getAllUsers() {
         return userRepository.findAll();

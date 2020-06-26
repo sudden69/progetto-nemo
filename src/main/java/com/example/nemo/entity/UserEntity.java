@@ -1,8 +1,13 @@
 package com.example.nemo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import javax.persistence.*;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "user",schema = "public")
@@ -11,9 +16,11 @@ public class UserEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private int id;
-   /* @OneToMany
-    @Column (name ="urlista")
-    private List<HashEntity> urlista ;*/
+
+    @JsonIgnoreProperties("buyer")
+    @OneToMany(targetEntity = HashEntity.class ,mappedBy = "buyer",cascade=CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<HashEntity> hashes;
+
     @Basic
     @Column(name = "code", nullable = true, length = 70)
     private String code;
@@ -33,14 +40,14 @@ public class UserEntity {
     @Column(name = "address", nullable = true, length = 150)
     private String address;
 
-    /*public void addUrl(HashEntity hash)
-    {
-        this.urlista.add(hash);
+    public Set<HashEntity> getHashes() {
+        return hashes;
     }
-    public void removeUrl(HashEntity hash)
-    {this.urlista.remove(hash);
-     //per le eccezioni poi vediamo
-    }*/
+
+    public void setHashes(Set<HashEntity> hashes) {
+        this.hashes = hashes;
+    }
+
     public int getId() {
         return id;
     }
@@ -125,7 +132,7 @@ public class UserEntity {
                 ", lastName='" + lastName + '\'' +
                 ", telephoneNumber='" + telephoneNumber + '\'' +
                 ", email='" + email + '\'' +
-                ", address='" + address + '\'' +
+                ", address='" + address +
                 '}';
     }
 

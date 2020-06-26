@@ -1,9 +1,14 @@
 package com.example.nemo.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import javax.persistence.*;
 
 @Entity
-@Table(name = "hash")
+@Table(name = "hash",schema = "public")
 public class HashEntity {
 
     @Id
@@ -14,11 +19,11 @@ public class HashEntity {
     @Column(name = "url")
     private String url;
 
- /*   @ManyToOne
-    @JoinColumn(name = "user")
-    private UserEntity user;
+    @ManyToOne
+    @JoinColumn(name = "buyer")
+    @JsonIgnoreProperties("buyers")
+    private UserEntity buyer;
 
-*/
     public String getId() {
         return id;
     }
@@ -27,17 +32,17 @@ public class HashEntity {
         this.id = id;
     }
 
-  /*  public UserEntity getUser()
+    public UserEntity getBuyer()
     {
-        return user;
+        return buyer;
     }
 
-    public void setUser(UserEntity user)
+    public void setBuyer(UserEntity buyer)
     {
-        this.user=user;
+        this.buyer=buyer;
     }
 
-   */
+
     public String getUrl() {
         return url;
     }
@@ -57,6 +62,15 @@ public class HashEntity {
         if (url != null ? !url.equals(hash.url) : hash.url != null) return false;
 
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return "HashEntity{" +
+                "id='" + id + '\'' +
+                ", url='" + url + '\'' +
+                ", user=" + buyer +
+                '}';
     }
 
     @Override
