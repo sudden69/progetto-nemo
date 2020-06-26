@@ -9,6 +9,8 @@ import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+import static java.lang.Math.abs;
+
 @Service
 public class HashService {
     @Autowired
@@ -21,6 +23,7 @@ public class HashService {
     public void addUrl(HashEntity hash){
         hashRepository.save(hash);
     }
+
     public List<HashEntity> showAllHash(){
         return hashRepository.findAll();
     }
@@ -42,9 +45,10 @@ public class HashService {
     }
 
     public HashEntity makeId(String url)
-    {StringBuilder Sb=new StringBuilder(30);
-        Sb.append("https://nemoswimmer.it/"); //https si ci voglio credere :P
-        Sb.append(url.hashCode());
+    {
+        StringBuilder Sb=new StringBuilder(30);
+        //Sb.append("https://nemoswimmer.it/"); //https si ci voglio credere :P
+        Sb.append(abs(url.hashCode()));
         HashEntity hash=new HashEntity();
         hash.setUrl(url);
         hash.setId(Sb.toString());

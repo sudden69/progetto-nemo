@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import com.example.nemo.supports.ResponseMessage;
 
 import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -18,29 +19,14 @@ public class HashController {
     @Autowired
     private HashService hashService;
 
-    @PostMapping
-    public ResponseEntity create (@RequestBody @Valid HashEntity hash){
-        hashService.addUrl(hash);
-        return new ResponseEntity<>(new ResponseMessage("Added hash"), HttpStatus.OK);
-    }
-
-//questo restituisce bad request
-
     @PostMapping("/make")
-    public ResponseEntity makeIdByAttribute(@RequestParam @Valid String url )
-    {HashEntity hash=hashService.makeId(url);
+    public HashEntity makeIdByAttribute(@RequestBody @Valid HashMap<String,String> url)
+    {
+        HashEntity hash=hashService.makeId(url.get("url"));
         hashService.addUrl(hash);
-        return new ResponseEntity<>(new ResponseMessage("Id created"),HttpStatus.OK);
+        return hash;
     }
 
-    //questo invece funziona
-
-    @PostMapping("/{url}")
-    public ResponseEntity makeId(@PathVariable("url") String url )
-    {HashEntity hash=hashService.makeId(url);
-     hashService.addUrl(hash);
-     return new ResponseEntity<>(new ResponseMessage("Id created"),HttpStatus.OK);
-    }
     @GetMapping("/{id}")
     public ResponseEntity getByHash(@PathVariable("id") String id){
         HashEntity hash = hashService.findUrlByHash(id);
@@ -48,18 +34,9 @@ public class HashController {
             return new ResponseEntity<>(new ResponseMessage("Id not found"), HttpStatus.OK);
         return new ResponseEntity<>(hash,HttpStatus.OK);
     }
+
     @GetMapping
     public List<HashEntity> getAll(){
         return hashService.showAllHash();
     }
-    /*
-    @GetMapping("/user/{id}")
-    public ResponseEntity getUserHashes(@PathVariable("id") int id){
-        List<Hash> ret = hashService.getUserHashes(id);
-        if(ret == null){
-            return new ResponseEntity(new ResponseMessage("No hash found"), HttpStatus.OK);
-        }
-        return new ResponseEntity(ret,HttpStatus.OK);
-    }
-    */
 }
