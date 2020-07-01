@@ -14,5 +14,5 @@ public interface HashRepository extends JpaRepository<HashEntity,String> {
 
     HashEntity findByUrl (String url);
     Set<HashEntity> findByBuyer(UserEntity user);
-
+    boolean existsByIdAndBuyerNot(String id,UserEntity user);
 }

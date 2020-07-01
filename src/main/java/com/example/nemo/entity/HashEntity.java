@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;
 
@@ -79,7 +80,4 @@ public class HashEntity {
         result = 31 * result + (url != null ? url.hashCode() : 0);
         return result;
     }
-
-
-
 }

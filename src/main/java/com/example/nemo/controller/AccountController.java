@@ -22,6 +22,7 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/users")
+@CrossOrigin("http://localhost:4200")
 public class AccountController {
     @Autowired
     private HashService hashService;

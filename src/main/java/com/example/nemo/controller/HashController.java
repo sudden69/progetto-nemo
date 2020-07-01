@@ -14,6 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/hashes")
+@CrossOrigin("http://localhost:4200")
 public class HashController {
 
     @Autowired
@@ -22,9 +23,7 @@ public class HashController {
     @PostMapping("/make")
     public HashEntity makeIdByAttribute(@RequestBody @Valid HashMap<String,String> url)
     {
-        HashEntity hash=hashService.makeId(url.get("url"));
-        hashService.addUrl(hash);
-        return hash;
+        return hashService.makeIdNoUser(url.get("url"));
     }
 
     @GetMapping("/{id}")
