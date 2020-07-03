@@ -20,9 +20,9 @@ public class HashEntity {
     @Id
     @Column(name = "id")
     private String id;
-    @Basic
+   /* @Basic
     @Column(name = "shUrl")
-    private String shUrl;
+    private String shUrl;*/
     @Basic
     @Column(name = "url")
     private String url;
@@ -49,18 +49,18 @@ public class HashEntity {
     }
 
         //qua avevo screenato sai cos'è
-    @Basic
+   /* @Basic
     @CreationTimestamp
     @Column(name = "creationTime")
     LocalDateTime creation;
-
+*/
     //check expiration
-    public boolean shouldBeKilled(LocalDateTime then)
+   /* public boolean shouldBeKilled(LocalDateTime then)
     {Duration duration=Duration.between((java.time.temporal.Temporal) creation,then);
      if(duration.getSeconds()>1800)
          return true;
      return false;
-    }
+    }*/
     //mappa massimi hashing raggiunti
     private static HashMap<Integer,Integer> hashing=new HashMap<Integer, Integer>();
     //non mi ricordo come si chiama maxint poi tolgo la costante che è brutta
@@ -124,7 +124,10 @@ public class HashEntity {
     public int getCurrentLista(int ind)
     {return lista[ind];
     }
-
+    public void setCurrentMap(Integer ind,Integer val)
+    {
+       this.hashing.put(ind,val);
+    }
     public String getId() {
         return id;
     }
@@ -151,12 +154,12 @@ public class HashEntity {
     public void setUrl(String url) {
         this.url = url;
     }
-    public void setShUrl()
+    /*public void setShUrl()
     {shUrl=Base64.getUrlEncoder().encodeToString(id.getBytes());
     }
     public void setCustomShUrl(String custom)
     {shUrl=custom;
-    }
+    }*/
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

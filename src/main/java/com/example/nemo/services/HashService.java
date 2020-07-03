@@ -70,13 +70,14 @@ public class HashService {
         k++;
         hash.setUrl(url);
         hash.setId(String.valueOf(k));
+        hash.setCurrentMap(t,k);
         if(hash.getCurrentLista(t)-k==0)
         {   hash.removeFromLista(t);
-            check(t);
+  //          check(t);
         }
         return hash;
     }
-    public void check(int t)
+    /*public void check(int t)
     { HashEntity hash=hashRepository.findById(String.valueOf(((t+1)*2147483647/21-t*2147483647/21)/2)).get();
       HashEntity hashLess=hashRepository.findById(String.valueOf(t*2147483647/21)).get();
       HashEntity hashMore=hashRepository.findById(String.valueOf((t+1)*2147483647/21)).get();
@@ -103,7 +104,7 @@ public class HashService {
         //la ricerca dicotomica a sinistra preferisco non farla
         //con meno di metà porzione libera è meglio aspettare
     }
-
+*/
     @Transactional
     public HashEntity makeIdNoUser(String url){
 
@@ -128,7 +129,7 @@ public class HashService {
         return hash;
     }
     //convertono l'id in base 64 o personalizzato
-    public void setShUrl(HashEntity hash)
+    /*public void setShUrl(HashEntity hash)
     {hash.setShUrl();
     }
     public boolean setCustomShUrl(HashEntity hash,String custom)
@@ -136,7 +137,7 @@ public class HashService {
         return false;
      hash.setCustomShUrl(custom);
      return true;
-    }
+    }*/
     public void inizialize(HashEntity hash)
     {hash.inizialize();
     }
