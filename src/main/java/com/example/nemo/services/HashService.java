@@ -127,7 +127,16 @@ public class HashService {
         addUrl(hash);
         return hash;
     }
-
+    //convertono l'id in base 64 o personalizzato
+    public void setShUrl(HashEntity hash)
+    {hash.setShUrl();
+    }
+    public boolean setCustomShUrl(HashEntity hash,String custom)
+    { if(hashRepository.existsByShUrl(custom))
+        return false;
+     hash.setCustomShUrl(custom);
+     return true;
+    }
     public void inizialize(HashEntity hash)
     {hash.inizialize();
     }

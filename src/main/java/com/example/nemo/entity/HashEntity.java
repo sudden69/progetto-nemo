@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.CreationTimestamp;
 import org.jetbrains.annotations.NotNull;
+
+import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import javax.persistence.*;
@@ -18,7 +20,9 @@ public class HashEntity {
     @Id
     @Column(name = "id")
     private String id;
-
+    @Basic
+    @Column(name = "shUrl")
+    private String shUrl;
     @Basic
     @Column(name = "url")
     private String url;
@@ -27,13 +31,29 @@ public class HashEntity {
     @JoinColumn(name = "buyer")
     @JsonIgnoreProperties("buyers")
     private UserEntity buyer;
+//convertitore timestamp
+    @Converter(autoApply = true)
+    public class LocalDateTimeConverter implements AttributeConverter<LocalDateTime,Timestamp>
+    {
+        @Override
+        public Timestamp convertToDatabaseColumn(LocalDateTime localDateTime) {
+            return (localDateTime == null ? null : Timestamp.valueOf(localDateTime));
 
-    //qua avevo screenato sai cos'è
+        }
+
+        @Override
+        public LocalDateTime convertToEntityAttribute(Timestamp sqlTimestamp) {
+            return (sqlTimestamp == null ? null : sqlTimestamp.toLocalDateTime());
+
+        }
+    }
+
+        //qua avevo screenato sai cos'è
     @Basic
     @CreationTimestamp
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "creationTime")
-    Date creation;
+    LocalDateTime creation;
+
     //check expiration
     public boolean shouldBeKilled(LocalDateTime then)
     {Duration duration=Duration.between((java.time.temporal.Temporal) creation,then);
@@ -131,7 +151,12 @@ public class HashEntity {
     public void setUrl(String url) {
         this.url = url;
     }
-
+    public void setShUrl()
+    {shUrl=Base64.getUrlEncoder().encodeToString(id.getBytes());
+    }
+    public void setCustomShUrl(String custom)
+    {shUrl=custom;
+    }
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
