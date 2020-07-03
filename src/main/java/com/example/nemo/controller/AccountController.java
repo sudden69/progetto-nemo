@@ -61,6 +61,7 @@ public class AccountController {
         return hashService.getUserHashes(user);
     }
 
+    @CrossOrigin("http://localhost:4200")
     @GetMapping
     public List<UserEntity> getAll() {
         return userService.getAllUsers();

@@ -2,6 +2,7 @@ package com.example.nemo.controller;
 
 import com.example.nemo.entity.HashEntity;
 import com.example.nemo.services.HashService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +34,12 @@ public class HashController {
             return new ResponseEntity<>(new ResponseMessage("Id not found"), HttpStatus.OK);
         return new ResponseEntity<>(hash,HttpStatus.OK);
     }
-
+    @PostMapping
+    public void inizialize()
+    { HashEntity hash=new HashEntity();
+        hashService.inizialize(hash);
+    }
+    @CrossOrigin("http://localhost:4200")
     @GetMapping
     public List<HashEntity> getAll(){
         return hashService.showAllHash();
