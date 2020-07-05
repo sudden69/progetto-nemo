@@ -7,10 +7,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.CreationTimestamp;
 import org.jetbrains.annotations.NotNull;
 
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import javax.persistence.*;
+import javax.persistence.criteria.CriteriaBuilder;
 import java.util.*;
 
 @Entity
@@ -20,47 +22,35 @@ public class HashEntity {
     @Id
     @Column(name = "id")
     private String id;
-   /* @Basic
-    @Column(name = "shUrl")
-    private String shUrl;*/
+
+    @Basic
+    @Column(name = "shurl")
+    private String shUrl;
+
     @Basic
     @Column(name = "url")
     private String url;
 
     @ManyToOne
-    @JoinColumn(name = "buyer")
-    @JsonIgnoreProperties("buyers")
+    @JoinColumn(name = "user_id")
+    @JsonIgnoreProperties("buyer")
     private UserEntity buyer;
-//convertitore timestamp
-    @Converter(autoApply = true)
-    public class LocalDateTimeConverter implements AttributeConverter<LocalDateTime,Timestamp>
-    {
-        @Override
-        public Timestamp convertToDatabaseColumn(LocalDateTime localDateTime) {
-            return (localDateTime == null ? null : Timestamp.valueOf(localDateTime));
 
-        }
-
-        @Override
-        public LocalDateTime convertToEntityAttribute(Timestamp sqlTimestamp) {
-            return (sqlTimestamp == null ? null : sqlTimestamp.toLocalDateTime());
-
-        }
-    }
-
-        //qua avevo screenato sai cos'è
-   /* @Basic
+    //qua avevo screenato sai cos'è
+    @Basic
     @CreationTimestamp
-    @Column(name = "creationTime")
-    LocalDateTime creation;
-*/
+    @Column(name = "creation_time")
+    Timestamp creation;
+
     //check expiration
-   /* public boolean shouldBeKilled(LocalDateTime then)
-    {Duration duration=Duration.between((java.time.temporal.Temporal) creation,then);
-     if(duration.getSeconds()>1800)
-         return true;
-     return false;
-    }*/
+   public boolean shouldBeKilled(LocalDateTime then)
+    {
+        Duration duration=Duration.between((java.time.temporal.Temporal) creation,then);
+        if(duration.getSeconds()>1800)
+             return true;
+        return false;
+    }
+    private static final int MAX = 63;
     //mappa massimi hashing raggiunti
     private static HashMap<Integer,Integer> hashing=new HashMap<Integer, Integer>();
     //non mi ricordo come si chiama maxint poi tolgo la costante che è brutta
@@ -75,7 +65,8 @@ public class HashEntity {
     private static int count=21;
     //inizializza la mappa
     public void inizialize()
-    {int k=2147483647/21;
+    {
+        int k=MAX/21;
         for (int i = 1; i < 22; i++)
         {
             lista[i]=k*i;
@@ -84,45 +75,52 @@ public class HashEntity {
     }
     //aggiorna la mappa quando un indice è pieno
     public void removeFromLista(int ind)
-    {if(lista[ind]!=-1)
-     {
-        lista[ind] = -1;
-        count--;
-     }
-     hashing.remove(ind);
+    {
+        if(lista[ind]!=-1)
+        {
+            lista[ind] = -1;
+            count--;
+        }
+        hashing.remove(ind);
     }
     //ripristina un indice della mappa ad un valore che si è liberato per expiration
     public void addToLista(int ind,int val)
-    {if(lista[ind]==-1)
-        count++;
-     lista[ind]=val;
-     int k=2147483647/21;
-     k=val-val%k;
-     //la porzione di mappa riparte dal suo "0"
-     hashing.put(ind,k);
+    {
+        if(lista[ind]==-1)
+            count++;
+        lista[ind]=val;
+        int k=MAX/21;
+        k=val-val%k;
+        //la porzione di mappa riparte dal suo "0"
+        hashing.put(ind,k);
     }
     //serve per non chiamare 2 volte un indice pieno
     public int getListaSize()
-    {return count;
+    {
+        return count;
     }
     //sta cosa si può fare in O(1) sicuramente
     //non so la chiave ma so la posizione nella mappa a cui accedere
     public int getListaIndex(int ind)
-    {Iterator it= hashing.entrySet().iterator();
-     while(ind>1)
-     { it.next();
-       ind--;
-     }
-     Map.Entry pair=(Map.Entry) it.next();
-     return (Integer) pair.getKey();
+    {
+        Iterator it= hashing.entrySet().iterator();
+        while(ind>1)
+        {
+            it.next();
+            ind--;
+        }
+        Map.Entry pair=(Map.Entry) it.next();
+        return (Integer) pair.getKey();
     }
     //prende l'ultimo hash usato per porzione, nel service viene incrementato
     public int getCurrentMap(int ind)
-    {return hashing.get(ind);
+    {
+        return hashing.get(ind);
     }
     //controlla il massimo hash libero
     public int getCurrentLista(int ind)
-    {return lista[ind];
+    {
+        return lista[ind];
     }
     public void setCurrentMap(Integer ind,Integer val)
     {
@@ -154,12 +152,27 @@ public class HashEntity {
     public void setUrl(String url) {
         this.url = url;
     }
-    /*public void setShUrl()
-    {shUrl=Base64.getUrlEncoder().encodeToString(id.getBytes());
+
+    public String getShUrl(){
+        return shUrl;
     }
-    public void setCustomShUrl(String custom)
-    {shUrl=custom;
-    }*/
+    public void setShUrlById()
+    {
+        shUrl=Base64.getUrlEncoder().encodeToString(id.getBytes());
+    }
+    public void setShUrl(String custom)
+    {
+        shUrl=custom;
+    }
+
+    public Timestamp getCreation(){
+        return creation;
+    }
+
+    public void setCreation(Timestamp creation) {
+        this.creation = creation;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/hashes")
-@CrossOrigin("http://localhost:4200")
+@CrossOrigin(origins = "*")
 public class HashController {
 
     @Autowired
@@ -36,7 +36,8 @@ public class HashController {
     }
     @PostMapping
     public void inizialize()
-    { HashEntity hash=new HashEntity();
+    {
+        HashEntity hash=new HashEntity();
         hashService.inizialize(hash);
     }
     @CrossOrigin("http://localhost:4200")

@@ -2,74 +2,66 @@ package com.example.nemo.controller;
 
 import com.example.nemo.entity.HashEntity;
 import com.example.nemo.entity.UserEntity;
-import com.example.nemo.repositories.UserRepository;
 import com.example.nemo.services.HashService;
 import com.example.nemo.services.UserService;
 import com.example.nemo.supports.ResponseMessage;
-import com.example.nemo.supports.exceptions.MailUserAlreadyExistException;
+
+
+
+import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.security.RolesAllowed;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+
 import java.util.Set;
 
 @RestController
 @RequestMapping("/users")
-@CrossOrigin("http://localhost:4200")
 public class AccountController {
     @Autowired
     private HashService hashService;
     @Autowired
     private UserService userService;
 
-    @PostMapping
-    public ResponseEntity create(@RequestBody HashMap<String,String> signupRequest) {
-        try {
-            UserEntity user = userService.registerUser(signupRequest);
-            return  ResponseEntity.ok(user);
-        } catch (MailUserAlreadyExistException e) {
-            return new ResponseEntity<>(new ResponseMessage("E-mail address already exist!"), HttpStatus.BAD_REQUEST);
-        }
-    }
-
+    // Questo tag serve a dire che a questo metodo ci puoi accedere solo se sei loggato come utente
+    @RolesAllowed("user")
     @PostMapping("/create")
-    public ResponseEntity addShortened (@RequestBody @Valid HashMap<String,String> body)
+    public ResponseEntity addShortened (@RequestBody @Valid HashMap<String,String> body,HttpServletRequest request)
     {
-        UserEntity user = userService.getById(Integer.parseInt(body.get("id")));
-        if(user==null){
-            return new ResponseEntity(new ResponseMessage("User inesistente"),HttpStatus.OK);
-        }
+
+        KeycloakAuthenticationToken principal = (KeycloakAuthenticationToken) request.getUserPrincipal();
+        //String userId = principal.getAccount().getKeycloakSecurityContext().getIdToken().getSubject();
+        UserEntity user = userService.getById(principal.getName());
         HashEntity hash = hashService.makeIdByUser(body.get("url"),user);
         userService.addHash(user,hash);
         return new ResponseEntity<>(hash,HttpStatus.OK);
-
     }
 
-
-    @GetMapping("/hashes/{id}")
-    public Set<HashEntity> getAllHashes(@PathVariable Integer id){
-        UserEntity user = userService.getById(id);
+    @RolesAllowed("user")
+    @GetMapping("/hashes")
+    public Set<HashEntity> getAllHashes(HttpServletRequest request){
+        KeycloakAuthenticationToken principal = (KeycloakAuthenticationToken) request.getUserPrincipal();
+        //String userId = principal.getAccount().getKeycloakSecurityContext().getIdToken().getSubject();
+        UserEntity user = userService.getById(principal.getName());
         if(user==null)
-            return null;
+            userService.addUser(principal);
         return hashService.getUserHashes(user);
     }
-
-    @CrossOrigin("http://localhost:4200")
-    @GetMapping
-    public List<UserEntity> getAll() {
-        return userService.getAllUsers();
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity getById(@PathVariable Integer id)
-    {UserEntity user=userService.getById(id);
+    @CrossOrigin(origins = "*")
+    @RolesAllowed("user")
+    @GetMapping()
+    public ResponseEntity getById(HttpServletRequest request)
+    {
+        KeycloakAuthenticationToken principal = (KeycloakAuthenticationToken) request.getUserPrincipal();
+        UserEntity user=userService.getById(principal.getName());
         if(user == null)
             return new ResponseEntity<>(new ResponseMessage("Id not found"), HttpStatus.OK);
         return new ResponseEntity<>(user,HttpStatus.OK);

@@ -28,6 +28,8 @@ public class HashService {
     @Autowired
     private UserRepository userRepository;
 
+    private final int MAX = 63;
+
     @Transactional
     public void addUrl(HashEntity hash){
         hashRepository.save(hash);
@@ -63,48 +65,53 @@ public class HashService {
         int size=hash.getListaSize();
         int t;
         if(size>0)
-            t = random.nextInt(size);
+            t = random.nextInt(size+1);
         else throw new RuntimeException();
         t=hash.getListaIndex(t);
         k = hash.getCurrentMap(t);
-        k++;
         hash.setUrl(url);
         hash.setId(String.valueOf(k));
-        hash.setCurrentMap(t,k);
-        if(hash.getCurrentLista(t)-k==0)
+
+        if(hash.getCurrentLista(t)-k+1==0)
         {   hash.removeFromLista(t);
-  //          check(t);
+            check(t);
         }
+        k++;
+        //hash.setShUrlById();
+        hash.setCurrentMap(t,k);
         return hash;
     }
-    /*public void check(int t)
-    { HashEntity hash=hashRepository.findById(String.valueOf(((t+1)*2147483647/21-t*2147483647/21)/2)).get();
-      HashEntity hashLess=hashRepository.findById(String.valueOf(t*2147483647/21)).get();
-      HashEntity hashMore=hashRepository.findById(String.valueOf((t+1)*2147483647/21)).get();
-      boolean control=false;
-      while(!control)
-      { //controllo il mediano e vedo se ce ne sono di più grandi liberi
-          if (hash.shouldBeKilled(LocalDateTime.now()))
-        { if (hashMore.shouldBeKilled(LocalDateTime.now()))
-            hash.addToLista(t, Integer.parseInt(hashMore.getId()));
-          else
-              { hashLess = hash; //da aggiustare col costruttore per copia;
-                hash=hashRepository.findById(String.valueOf((Integer.parseInt(hash.getId())+Integer.parseInt(hashMore.getId()))/2)).get();
+
+    public void check(int t)
+    {
+        HashEntity hash=hashRepository.findById(String.valueOf(((t)*MAX/21+(t-1)*MAX/21)/2)).get();
+        HashEntity hashLess=hashRepository.findById(String.valueOf((t-1)*MAX/21)).get();
+        HashEntity hashMore=hashRepository.findById(String.valueOf((t)*MAX/21)).get();
+        boolean control=false;
+        while(!control)
+        { //controllo il mediano e vedo se ce ne sono di più grandi liberi
+              if (hash.shouldBeKilled(LocalDateTime.now())) {
+                  if (hashMore.shouldBeKilled(LocalDateTime.now()))
+                      hash.addToLista(t, Integer.parseInt(hashMore.getId()));
+                  else {
+                      hashLess = hash; //da aggiustare col costruttore per copia;
+                      hash = hashRepository.findById(String.valueOf((Integer.parseInt(hash.getId()) + Integer.parseInt(hashMore.getId())) / 2)).get();
+                  }
               }
-        }
+
           //non ci sono elementi più grandi,controllo se è la prima iterazione o meno
-        else if(hashLess.shouldBeKilled(LocalDateTime.now())&&hashLess.getId()!=String.valueOf(t*2147483647/21))
-        {
-          hash.addToLista(t, Integer.parseInt(hashLess.getId()));
-          control = true;
-        }
+            else if(hashLess.shouldBeKilled(LocalDateTime.now())&&hashLess.getId()!=String.valueOf(t*MAX/21))
+            {
+            hash.addToLista(t, Integer.parseInt(hashLess.getId()));
+            control = true;
+            }
        }
         //se nessuna condizione si verifica, aspetto ciclando attivamente
           // un wait prima del prossimo ciclo potrebbe essere una buona idea
         //la ricerca dicotomica a sinistra preferisco non farla
         //con meno di metà porzione libera è meglio aspettare
     }
-*/
+
     @Transactional
     public HashEntity makeIdNoUser(String url){
 
@@ -119,12 +126,10 @@ public class HashService {
     @Transactional
     public HashEntity makeIdByUser(String url,UserEntity user)
     {
-        HashEntity hash = makeId(url);
+        HashEntity hash = hashRepository.findByUrlAndBuyer(url,user);
+        if(hash != null) return hash;
+        hash = makeId(url);
         hash.setBuyer(user);
-        //Qui faccio il controllo con un nuovo metodo creato nel repository
-       /* if(hashRepository.existsByIdAndBuyerNot(hash.getId(),hash.getBuyer()))
-            hash.setId(String.valueOf(Integer.parseInt(hash.getId())+1));*/
-        //no longer necessary
         addUrl(hash);
         return hash;
     }
