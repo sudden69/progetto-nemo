@@ -34,12 +34,12 @@ public class HashController {
             return new ResponseEntity<>(new ResponseMessage("Id not found"), HttpStatus.OK);
         return new ResponseEntity<>(hash,HttpStatus.OK);
     }
-    @PostMapping
-    public void inizialize()
-    {
-        HashEntity hash=new HashEntity();
-        hashService.inizialize(hash);
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity deleteHash(@PathVariable("id") String id){
+        hashService.deleteHash(id);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
+
     @CrossOrigin("http://localhost:4200")
     @GetMapping
     public List<HashEntity> getAll(){

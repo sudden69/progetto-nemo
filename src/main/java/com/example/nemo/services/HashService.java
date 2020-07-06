@@ -9,13 +9,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import com.example.nemo.repositories.HashRepository;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
+import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.random;
@@ -29,7 +28,97 @@ public class HashService {
     private UserRepository userRepository;
 
     private final int MAX = 63;
+    //check expiration
+    public boolean shouldBeKilled(LocalDateTime then,HashEntity hashEntity)
+    {
+        Duration duration=Duration.between((java.time.temporal.Temporal) hashEntity.getCreation(),then);
+        if(duration.getSeconds()>1800)
+            return true;
+        return false;
+    }
+    //mappa massimi hashing raggiunti
+    private static HashMap<Integer,Integer> hashing=new HashMap<Integer, Integer>();
+    //non mi ricordo come si chiama maxint poi tolgo la costante che è brutta
+    //private static Set<Integer> pool;
+    //lista massimo hash raggiungibile per porzione, indice 1 based
+    private static Integer [] lista= new Integer[22];
+    //contatore indici non riempiti. Sto pensando se tenerlo o meno
+    //se vedi nel service comunque blocco tutto se trovo un indice pieno
+    //servirebbe una gestione con i thread per usare questo contatore
+    //penso alla possibilità di far accedere più user contemporaneamente
+    //non saprei come testarla in locale
+    private static int count=21;
 
+    //inizializza la mappa
+    //Con questa annotazione viene lanciato in automatico il metodo inizialize
+    @PostConstruct
+    public void inizialize()
+    {
+        System.out.println("Fatto");
+        int k=MAX/21;
+        for (int i = 1; i < 22; i++)
+        {
+            lista[i]=k*i;
+            hashing.put(i, (i - 1) * k);
+        }
+    }
+    //aggiorna la mappa quando un indice è pieno
+    public void removeFromLista(int ind)
+    {
+        if(lista[ind]!=-1)
+        {
+            lista[ind] = -1;
+            count--;
+        }
+        hashing.remove(ind);
+    }
+    //ripristina un indice della mappa ad un valore che si è liberato per expiration
+    public void addToLista(int ind,int val)
+    {
+        if(lista[ind]==-1)
+            count++;
+        lista[ind]=val;
+        int k=MAX/21;
+        k=val-val%k;
+        //la porzione di mappa riparte dal suo "0"
+        hashing.put(ind,k);
+    }
+    public void setShUrlById(HashEntity hashEntity)
+    {
+        hashEntity.setShUrl(Base64.getUrlEncoder().encodeToString(hashEntity.getId().getBytes()));
+    }
+    //serve per non chiamare 2 volte un indice pieno
+    public int getListaSize()
+    {
+        return count;
+    }
+    //sta cosa si può fare in O(1) sicuramente
+    //non so la chiave ma so la posizione nella mappa a cui accedere
+    public int getListaIndex(int ind)
+    {
+        Iterator it= hashing.entrySet().iterator();
+        while(ind>1)
+        {
+            it.next();
+            ind--;
+        }
+        Map.Entry pair=(Map.Entry) it.next();
+        return (Integer) pair.getKey();
+    }
+    //prende l'ultimo hash usato per porzione, nel service viene incrementato
+    public int getCurrentMap(int ind)
+    {
+        return hashing.get(ind);
+    }
+    //controlla il massimo hash libero
+    public int getCurrentLista(int ind)
+    {
+        return lista[ind];
+    }
+    public void setCurrentMap(Integer ind,Integer val)
+    {
+        this.hashing.put(ind,val);
+    }
     @Transactional
     public void addUrl(HashEntity hash){
         hashRepository.save(hash);
@@ -62,23 +151,23 @@ public class HashService {
         HashEntity hash=new HashEntity();
         Random random=new Random();
         int k;
-        int size=hash.getListaSize();
+        int size=getListaSize();
         int t;
         if(size>0)
             t = random.nextInt(size+1);
         else throw new RuntimeException();
-        t=hash.getListaIndex(t);
-        k = hash.getCurrentMap(t);
+        t=getListaIndex(t);
+        k = getCurrentMap(t);
         hash.setUrl(url);
         hash.setId(String.valueOf(k));
 
-        if(hash.getCurrentLista(t)-k+1==0)
-        {   hash.removeFromLista(t);
+        if(getCurrentLista(t)-k+1==0)
+        {   removeFromLista(t);
             check(t);
         }
         k++;
         //hash.setShUrlById();
-        hash.setCurrentMap(t,k);
+        setCurrentMap(t,k);
         return hash;
     }
 
@@ -90,9 +179,9 @@ public class HashService {
         boolean control=false;
         while(!control)
         { //controllo il mediano e vedo se ce ne sono di più grandi liberi
-              if (hash.shouldBeKilled(LocalDateTime.now())) {
-                  if (hashMore.shouldBeKilled(LocalDateTime.now()))
-                      hash.addToLista(t, Integer.parseInt(hashMore.getId()));
+              if (shouldBeKilled(LocalDateTime.now(),hash)) {
+                  if (shouldBeKilled(LocalDateTime.now(),hashMore))
+                      addToLista(t, Integer.parseInt(hashMore.getId()));
                   else {
                       hashLess = hash; //da aggiustare col costruttore per copia;
                       hash = hashRepository.findById(String.valueOf((Integer.parseInt(hash.getId()) + Integer.parseInt(hashMore.getId())) / 2)).get();
@@ -100,10 +189,10 @@ public class HashService {
               }
 
           //non ci sono elementi più grandi,controllo se è la prima iterazione o meno
-            else if(hashLess.shouldBeKilled(LocalDateTime.now())&&hashLess.getId()!=String.valueOf(t*MAX/21))
+            else if(shouldBeKilled(LocalDateTime.now(),hashLess)&&hashLess.getId()!=String.valueOf(t*MAX/21))
             {
-            hash.addToLista(t, Integer.parseInt(hashLess.getId()));
-            control = true;
+                addToLista(t, Integer.parseInt(hashLess.getId()));
+                control = true;
             }
        }
         //se nessuna condizione si verifica, aspetto ciclando attivamente
@@ -144,11 +233,16 @@ public class HashService {
      return true;
     }*/
     public void inizialize(HashEntity hash)
-    {hash.inizialize();
+    {
+        inizialize();
     }
 
     public int getSize(@NotNull String url)  //tinyurl lo fa, noi non possiamo essere da meno
     {return url.length();
+    }
+
+    public void deleteHash(String id){
+        hashRepository.deleteById(id);
     }
 
 }

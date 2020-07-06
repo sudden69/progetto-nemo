@@ -42,90 +42,7 @@ public class HashEntity {
     @Column(name = "creation_time")
     Timestamp creation;
 
-    //check expiration
-   public boolean shouldBeKilled(LocalDateTime then)
-    {
-        Duration duration=Duration.between((java.time.temporal.Temporal) creation,then);
-        if(duration.getSeconds()>1800)
-             return true;
-        return false;
-    }
-    private static final int MAX = 63;
-    //mappa massimi hashing raggiunti
-    private static HashMap<Integer,Integer> hashing=new HashMap<Integer, Integer>();
-    //non mi ricordo come si chiama maxint poi tolgo la costante che è brutta
-    //private static Set<Integer> pool;
-    //lista massimo hash raggiungibile per porzione, indice 1 based
-    private static Integer [] lista= new Integer[22];
-    //contatore indici non riempiti. Sto pensando se tenerlo o meno
-    //se vedi nel service comunque blocco tutto se trovo un indice pieno
-    //servirebbe una gestione con i thread per usare questo contatore
-    //penso alla possibilità di far accedere più user contemporaneamente
-    //non saprei come testarla in locale
-    private static int count=21;
-    //inizializza la mappa
-    public void inizialize()
-    {
-        int k=MAX/21;
-        for (int i = 1; i < 22; i++)
-        {
-            lista[i]=k*i;
-            hashing.put(i, (i - 1) * k);
-        }
-    }
-    //aggiorna la mappa quando un indice è pieno
-    public void removeFromLista(int ind)
-    {
-        if(lista[ind]!=-1)
-        {
-            lista[ind] = -1;
-            count--;
-        }
-        hashing.remove(ind);
-    }
-    //ripristina un indice della mappa ad un valore che si è liberato per expiration
-    public void addToLista(int ind,int val)
-    {
-        if(lista[ind]==-1)
-            count++;
-        lista[ind]=val;
-        int k=MAX/21;
-        k=val-val%k;
-        //la porzione di mappa riparte dal suo "0"
-        hashing.put(ind,k);
-    }
-    //serve per non chiamare 2 volte un indice pieno
-    public int getListaSize()
-    {
-        return count;
-    }
-    //sta cosa si può fare in O(1) sicuramente
-    //non so la chiave ma so la posizione nella mappa a cui accedere
-    public int getListaIndex(int ind)
-    {
-        Iterator it= hashing.entrySet().iterator();
-        while(ind>1)
-        {
-            it.next();
-            ind--;
-        }
-        Map.Entry pair=(Map.Entry) it.next();
-        return (Integer) pair.getKey();
-    }
-    //prende l'ultimo hash usato per porzione, nel service viene incrementato
-    public int getCurrentMap(int ind)
-    {
-        return hashing.get(ind);
-    }
-    //controlla il massimo hash libero
-    public int getCurrentLista(int ind)
-    {
-        return lista[ind];
-    }
-    public void setCurrentMap(Integer ind,Integer val)
-    {
-       this.hashing.put(ind,val);
-    }
+
     public String getId() {
         return id;
     }
@@ -156,10 +73,7 @@ public class HashEntity {
     public String getShUrl(){
         return shUrl;
     }
-    public void setShUrlById()
-    {
-        shUrl=Base64.getUrlEncoder().encodeToString(id.getBytes());
-    }
+
     public void setShUrl(String custom)
     {
         shUrl=custom;
