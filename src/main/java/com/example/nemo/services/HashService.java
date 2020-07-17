@@ -12,7 +12,7 @@ import com.example.nemo.repositories.HashRepository;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
-import java.time.Duration;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -29,10 +29,11 @@ public class HashService {
 
     private final int MAX = 63;
     //check expiration
-    public boolean shouldBeKilled(LocalDateTime then,HashEntity hashEntity)
-    {
-        Duration duration=Duration.between((java.time.temporal.Temporal) hashEntity.getCreation(),then);
-        if(duration.getSeconds()>1800)
+    public boolean shouldBeKilled(Timestamp then, HashEntity hashEntity)
+    { long creation= hashEntity.getCreation().getTime();
+      long now=then.getTime();
+      long duration=now-creation;
+        if(duration>1800)
             return true;
         return false;
     }
@@ -159,14 +160,22 @@ public class HashService {
         t=getListaIndex(t);
         k = getCurrentMap(t);
         hash.setUrl(url);
+        try
+        {hashRepository.findById(String.valueOf(k)).get();
+         hash.setCreation(Timestamp.valueOf(LocalDateTime.now()));
+        }
+        catch(Exception e)
+        {
+        }
         hash.setId(String.valueOf(k));
 
-        if(getCurrentLista(t)-k+1==0)
+        if(getCurrentLista(t)-k==1)
         {   removeFromLista(t);
             check(t);
+            k=getCurrentMap(t)-1;
         }
         k++;
-        //hash.setShUrlById();
+        setShUrlById(hash);
         setCurrentMap(t,k);
         return hash;
     }
@@ -175,39 +184,40 @@ public class HashService {
     {
         HashEntity hash=hashRepository.findById(String.valueOf(((t)*MAX/21+(t-1)*MAX/21)/2)).get();
         HashEntity hashLess=hashRepository.findById(String.valueOf((t-1)*MAX/21)).get();
-        HashEntity hashMore=hashRepository.findById(String.valueOf((t)*MAX/21)).get();
+        int hashMore=t*MAX/21;
         boolean control=false;
+        int upper=-1;
         while(!control)
         { //controllo il mediano e vedo se ce ne sono di più grandi liberi
-              if (shouldBeKilled(LocalDateTime.now(),hash)) {
-                  if (shouldBeKilled(LocalDateTime.now(),hashMore))
-                      addToLista(t, Integer.parseInt(hashMore.getId()));
-                  else {
+              if (shouldBeKilled(Timestamp.valueOf(LocalDateTime.now()),hash)) {
+
                       hashLess = hash; //da aggiustare col costruttore per copia;
-                      hash = hashRepository.findById(String.valueOf((Integer.parseInt(hash.getId()) + Integer.parseInt(hashMore.getId())) / 2)).get();
-                  }
+                      int k=(Integer.parseInt(hash.getId()) + hashMore) / 2;
+                      if(k!=hashMore-1)
+                          hash=hashRepository.findById(String.valueOf(k)).get();
+                      else
+                      {
+                          upper= Integer.parseInt(hashLess.getId());
+                          addToLista(t, upper);
+                          control = true;
+                      }
+
               }
 
           //non ci sono elementi più grandi,controllo se è la prima iterazione o meno
-            else if(shouldBeKilled(LocalDateTime.now(),hashLess)&&hashLess.getId()!=String.valueOf(t*MAX/21))
-            {
-                addToLista(t, Integer.parseInt(hashLess.getId()));
+            else if(shouldBeKilled(Timestamp.valueOf(LocalDateTime.now()),hashLess)&&hashLess.getId()!=String.valueOf((t-1)*MAX/21))
+            {   upper= Integer.parseInt(hashLess.getId());
+                addToLista(t, upper);
                 control = true;
             }
+
        }
-        //se nessuna condizione si verifica, aspetto ciclando attivamente
-          // un wait prima del prossimo ciclo potrebbe essere una buona idea
-        //la ricerca dicotomica a sinistra preferisco non farla
-        //con meno di metà porzione libera è meglio aspettare
     }
 
     @Transactional
     public HashEntity makeIdNoUser(String url){
 
         HashEntity hash = makeId(url);
-        /*if(hashRepository.existsById(hash.getId()))
-            hash.setId(String.valueOf(Integer.parseInt(hash.getId())+1));
-         */ // no longer necessary
         addUrl(hash);
         return hash;
     }
@@ -223,15 +233,13 @@ public class HashService {
         return hash;
     }
     //convertono l'id in base 64 o personalizzato
-    /*public void setShUrl(HashEntity hash)
-    {hash.setShUrl();
-    }
+
     public boolean setCustomShUrl(HashEntity hash,String custom)
     { if(hashRepository.existsByShUrl(custom))
         return false;
-     hash.setCustomShUrl(custom);
+     hash.setShUrl(custom);
      return true;
-    }*/
+    }
     public void inizialize(HashEntity hash)
     {
         inizialize();

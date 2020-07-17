@@ -1,23 +1,15 @@
 package com.example.nemo.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.CreationTimestamp;
-import org.jetbrains.annotations.NotNull;
 
-import java.sql.Time;
 import java.sql.Timestamp;
-import java.time.Duration;
-import java.time.LocalDateTime;
 import javax.persistence.*;
-import javax.persistence.criteria.CriteriaBuilder;
-import java.util.*;
 
 @Entity
 @Table(name = "hash",schema = "public")
 public class HashEntity {
+
 
     @Id
     @Column(name = "id")
@@ -32,7 +24,7 @@ public class HashEntity {
     private String url;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "buyer")
     @JsonIgnoreProperties("buyer")
     private UserEntity buyer;
 
@@ -111,7 +103,8 @@ public class HashEntity {
 
     @Override
     public int hashCode() {
-        int result = id != null ? id.hashCode() : 0;
+        int result = id != null ? id.hashCode() :
+                0;
         result = 31 * result + (url != null ? url.hashCode() : 0);
         return result;
     }
