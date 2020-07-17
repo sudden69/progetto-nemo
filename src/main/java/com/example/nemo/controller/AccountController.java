@@ -2,6 +2,7 @@ package com.example.nemo.controller;
 
 import com.example.nemo.entity.HashEntity;
 import com.example.nemo.entity.UserEntity;
+import com.example.nemo.repositories.HashRepository;
 import com.example.nemo.services.HashService;
 import com.example.nemo.services.UserService;
 import com.example.nemo.supports.ResponseMessage;
@@ -21,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.HashMap;
 
+import java.util.Optional;
 import java.util.Set;
 
 @RestController
@@ -67,5 +69,18 @@ public class AccountController {
         return new ResponseEntity<>(user,HttpStatus.OK);
     }
 
-
+    @GetMapping("/size/{id}")
+    public int getShSize(@PathVariable("id") String id)
+    {   //il nome findUrlByHash non va bene, l'hash è nello shurl
+        HashEntity hash= hashService.findUrlByHash(id);
+        return hashService.getShSize(hash);
+    }
+    //scelta del nome molto poco originale
+    //forse conviene accoppiarli questi due metodi
+    //e restituire i valori come coppia
+    @GetMapping("/length/{id}")
+    public int getSize(@PathVariable("id") String id)
+    {HashEntity hash= hashService.findUrlByHash(id);
+     return hashService.getSize(hash);
+    }
 }

@@ -1,6 +1,7 @@
 package com.example.nemo.controller;
 
 import com.example.nemo.entity.HashEntity;
+import com.example.nemo.repositories.HashRepository;
 import com.example.nemo.services.HashService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,8 @@ public class HashController {
         hashService.deleteHash(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+
 
     @CrossOrigin("http://localhost:4200")
     @GetMapping

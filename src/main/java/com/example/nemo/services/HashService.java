@@ -149,6 +149,7 @@ public class HashService {
     */ /* bravo */
     public HashEntity makeId(String url)
     {
+
         HashEntity hash=new HashEntity();
         Random random=new Random();
         int k;
@@ -168,7 +169,12 @@ public class HashService {
         {
         }
         hash.setId(String.valueOf(k));
-
+        try {
+            if (shouldBeKilled(Timestamp.valueOf(LocalDateTime.now()), hashRepository.findById(String.valueOf(t*MAX/21)).get())) {
+                addToLista(t, t*MAX/21);
+            }
+        }
+        catch(Exception e){}
         if(getCurrentLista(t)-k==1)
         {   removeFromLista(t);
             check(t);
@@ -188,7 +194,8 @@ public class HashService {
         boolean control=false;
         int upper=-1;
         while(!control)
-        { //controllo il mediano e vedo se ce ne sono di più grandi liberi
+        {
+            //controllo il mediano e vedo se ce ne sono di più grandi liberi
               if (shouldBeKilled(Timestamp.valueOf(LocalDateTime.now()),hash)) {
 
                       hashLess = hash; //da aggiustare col costruttore per copia;
@@ -198,7 +205,7 @@ public class HashService {
                       else
                       {
                           upper= Integer.parseInt(hashLess.getId());
-                          addToLista(t, upper);
+                          addToLista(t, upper+1);
                           control = true;
                       }
 
@@ -207,7 +214,7 @@ public class HashService {
           //non ci sono elementi più grandi,controllo se è la prima iterazione o meno
             else if(shouldBeKilled(Timestamp.valueOf(LocalDateTime.now()),hashLess)&&hashLess.getId()!=String.valueOf((t-1)*MAX/21))
             {   upper= Integer.parseInt(hashLess.getId());
-                addToLista(t, upper);
+                addToLista(t, upper+1);
                 control = true;
             }
 
@@ -245,10 +252,15 @@ public class HashService {
         inizialize();
     }
 
-    public int getSize(@NotNull String url)  //tinyurl lo fa, noi non possiamo essere da meno
-    {return url.length();
+    public int getSize(HashEntity hash)  //tinyurl lo fa, noi non possiamo essere da meno
+    {String temp=hash.getUrl();
+     return temp.length();
     }
 
+    public int getShSize(HashEntity hash)
+    {String temp=hash.getShUrl();
+     return temp.length();
+    }
     public void deleteHash(String id){
         hashRepository.deleteById(id);
     }
