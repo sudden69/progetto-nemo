@@ -55,13 +55,31 @@ public class AccountController {
 
     @RolesAllowed("user")
     @GetMapping("/hashes")
-    public Set<HashEntity> getAllHashes(HttpServletRequest request){
+    public Set<HashEntity> getAllHashes(@RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber, @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,HttpServletRequest request){
         KeycloakAuthenticationToken principal = (KeycloakAuthenticationToken) request.getUserPrincipal();
         //String userId = principal.getAccount().getKeycloakSecurityContext().getIdToken().getSubject();
         UserEntity user = userService.getById(principal.getName());
         if(user==null)
             userService.addUser(principal);
-        return hashService.getUserHashes(user);
+        Set<HashEntity> result=hashService.getUserHashes(user ,pageNumber,pageSize );
+        if ( result.size() <= 0 ) {
+            throw new RuntimeException();
+        }
+        return result;
+    }
+    //test
+    @GetMapping("/hash")
+    public Set<HashEntity> getHashes(@RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber, @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,HttpServletRequest request){
+        //KeycloakAuthenticationToken principal = (KeycloakAuthenticationToken) request.getUserPrincipal();
+        //String userId = principal.getAccount().getKeycloakSecurityContext().getIdToken().getSubject();
+        //UserEntity user = userService.getById(principal.getName());
+        //if(user==null)
+         //   userService.addUser(principal);
+        Set<HashEntity> result=hashService.showAllHash(pageNumber,pageSize );
+        if ( result.size() <= 0 ) {
+            throw new RuntimeException();
+        }
+        return result;
     }
 
     @RolesAllowed("user")
@@ -86,9 +104,6 @@ public class AccountController {
         HashEntity hash= hashService.findUrlByHash(id);
         return hashService.getShSize(hash);
     }
-    //scelta del nome molto poco originale
-    //forse conviene accoppiarli questi due metodi
-    //e restituire i valori come coppia
     @GetMapping("/length/{id}")
     public int getSize(@PathVariable("id") String id)
     {HashEntity hash= hashService.findUrlByHash(id);

@@ -10,6 +10,8 @@ import javax.persistence.*;
 @Table(name = "hash",schema = "public")
 public class HashEntity {
 
+    @Column(name = "visite")
+    private long visite;
 
     @Id
     @Column(name = "id")
@@ -53,7 +55,13 @@ public class HashEntity {
         this.buyer=buyer;
     }
 
+    public void setVisite(long k)
+    {this.visite=k;
+    }
 
+    public long getVisite()
+    {return visite;
+    }
     public String getUrl() {
         return url;
     }

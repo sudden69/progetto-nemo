@@ -8,11 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import com.example.nemo.repositories.HashRepository;
-import org.springframework.transaction.annotation.Isolation;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
-import org.springframework.transaction.annotation.Transactional;
+import javax.transaction.Transactional;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -31,12 +30,11 @@ public class HashService {
     private final int MAX = 63;
     //check expiration
     public boolean shouldBeKilled(Timestamp then, HashEntity hashEntity)
-    {
-        long creation= hashEntity.getCreation().getTime();
-        long now=then.getTime();
-        long duration=now-creation;
+    { long creation= hashEntity.getCreation().getTime();
+      long now=then.getTime();
+      long duration=now-creation;
         if(duration>1800)
-                return true;
+            return true;
         return false;
     }
     //mappa massimi hashing raggiunti
@@ -57,6 +55,7 @@ public class HashService {
     @PostConstruct
     public void inizialize()
     {
+        System.out.println("Fatto");
         int k=MAX/21;
         for (int i = 1; i < 22; i++)
         {
@@ -144,17 +143,13 @@ public class HashService {
         else
             return null;
     }
-    public HashEntity findUrlBySh(String shUrl){
-        HashEntity ret = hashRepository.findByShUrl(shUrl);
-        return ret;
-    }
     /*
     ho accomunato questo metodo per la creazione esclusiva dell'hash delegando poi ai due metodi makeIdNoUser e makeIdByUser il controllo
     dell'eventuale esistenza dell'hash
     */ /* bravo */
-    @Transactional(readOnly = false , isolation = Isolation.SERIALIZABLE)
     public HashEntity makeId(String url)
     {
+
         HashEntity hash=new HashEntity();
         Random random=new Random();
         int k;
@@ -251,6 +246,10 @@ public class HashService {
         return false;
      hash.setShUrl(custom);
      return true;
+    }
+    public void inizialize(HashEntity hash)
+    {
+        inizialize();
     }
 
     public int getSize(HashEntity hash)  //tinyurl lo fa, noi non possiamo essere da meno
