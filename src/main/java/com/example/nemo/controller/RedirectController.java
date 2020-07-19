@@ -28,7 +28,7 @@ public class RedirectController {
         if(hashEntity!=null) {
             redirectView.setUrl(hashEntity.getUrl());
             long v=hashservice.getVisite(hashEntity);
-            hashservice.setVisite(v,hashEntity);
+            hashservice.setVisite(v+1,hashEntity);
             return redirectView;
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND,"url not found");
