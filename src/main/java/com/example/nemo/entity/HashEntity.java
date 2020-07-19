@@ -9,7 +9,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "hash",schema = "public")
 public class HashEntity {
-
+    @Basic
     @Column(name = "visite")
     private long visite;
 

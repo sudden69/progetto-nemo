@@ -10,9 +10,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.example.nemo.supports.ResponseMessage;
 
+import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/hashes")
@@ -42,10 +44,10 @@ public class HashController {
     }
 
 
-
+    @RolesAllowed("admin")
     @CrossOrigin("http://localhost:4200")
     @GetMapping
-    public List<HashEntity> getAll(){
-        return hashService.showAllHash();
+    public List<HashEntity> getAll(@RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber, @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,@RequestParam(value = "sortBy", defaultValue = "id") String sortBy){
+        return hashService.showAllHash(pageNumber,pageSize,sortBy);
     }
 }

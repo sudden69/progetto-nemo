@@ -5,6 +5,9 @@ import com.example.nemo.entity.UserEntity;
 import com.example.nemo.repositories.UserRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import com.example.nemo.repositories.HashRepository;
@@ -130,12 +133,22 @@ public class HashService {
     Questa è l'unica cosa che sono riuscito a fare, il compareTo anche se lo scrivo non lo usa, penso che lo voglia
     passato solo così, ovviamente fa ordine lessicografico
     */
-    public List<HashEntity> showAllHash(){
-        return hashRepository.findAll(Sort.by("id").descending());
+    public List <HashEntity> showAllHash(int pageNumber, int pageSize, String sortBy)
+    {   Pageable paging = PageRequest.of(pageNumber, pageSize,Sort.by(sortBy));
+        Page<HashEntity> pagedResult = hashRepository.findAll(paging);
+        if ( pagedResult.hasContent() ) {
+            return pagedResult.getContent();
+        }
+        return null;
     }
-
-    public Set<HashEntity> getUserHashes(UserEntity user){
-            return hashRepository.findByBuyer(user);
+    public List <HashEntity> getUserHashes(UserEntity user, int pageNumber, int pageSize, String sortBy)
+    {
+        Pageable paging = PageRequest.of(pageNumber, pageSize,Sort.by(sortBy));
+        Page<HashEntity> pagedResult = hashRepository.findAllByBuyer(paging,user);
+        if ( pagedResult.hasContent() ) {
+            return pagedResult.getContent();
+        }
+        return null;
     }
 
     public HashEntity findUrlByHash(String id){
@@ -249,10 +262,6 @@ public class HashService {
      hash.setShUrl(custom);
      return true;
     }
-    public void inizialize(HashEntity hash)
-    {
-        inizialize();
-    }
 
     public int getSize(HashEntity hash)  //tinyurl lo fa, noi non possiamo essere da meno
     {String temp=hash.getUrl();
@@ -265,6 +274,16 @@ public class HashService {
     }
     public void deleteHash(String id){
         hashRepository.deleteById(id);
+    }
+
+    public HashEntity findHashbyShUrl(String hash) {
+        return hashRepository.findByShUrl(hash);
+    }
+    @Transactional
+    public void incrementaVisite(HashEntity hashEntity){
+        long visite = hashEntity.getVisite();
+        hashEntity.setVisite(visite+1);
+        hashRepository.save(hashEntity);
     }
 
 }
