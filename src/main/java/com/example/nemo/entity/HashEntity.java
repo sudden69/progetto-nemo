@@ -26,7 +26,7 @@ public class HashEntity {
     private String url;
 
     @ManyToOne
-    @JoinColumn(name = "buyer")
+    @JoinColumn(name = "user_id")
     @JsonIgnoreProperties("buyer")
     private UserEntity buyer;
 
