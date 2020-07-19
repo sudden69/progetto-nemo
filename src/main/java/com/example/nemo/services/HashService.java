@@ -43,6 +43,12 @@ public class HashService {
             return true;
         return false;
     }
+    public void setAlive(HashEntity hash)
+    {hash.setAlive(shouldBeKilled(Timestamp.valueOf(LocalDateTime.now()),hash));
+    }
+    public boolean getAlive(HashEntity hash)
+    {return hash.getAlive();
+    }
     //mappa massimi hashing raggiunti
     private static HashMap<Integer,Integer> hashing=new HashMap<Integer, Integer>();
     //non mi ricordo come si chiama maxint poi tolgo la costante che è brutta

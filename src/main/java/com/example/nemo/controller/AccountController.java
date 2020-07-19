@@ -92,4 +92,15 @@ public class AccountController {
     public List<UserEntity> getAllUser(@RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber, @RequestParam(value = "pageSize", defaultValue = "10") int pageSize){
         return userService.getAllUser(pageNumber,pageSize);
     }
+
+    //aggiorna lo stato degli hash
+    @RolesAllowed("user")
+    @PostMapping("/refresh")
+    public void refresh(@RequestParam(value = "id") String id,@RequestParam(value= "pageNumber", defaultValue= "0") int pageNumber, @RequestParam(value = "pageSize", defaultValue ="10")int pageSize)
+    {List <HashEntity> lista=hashService.getUserHashes(userService.getById(id),pageNumber,pageSize, "shUrl");
+     Iterator <HashEntity> it=lista.iterator();
+     while(it.hasNext())
+     hashService.setAlive(it.next());
+    }
+
 }

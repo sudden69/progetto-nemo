@@ -61,6 +61,14 @@ public class HashEntity {
         this.buyer=buyer;
     }
 
+    public void setAlive(boolean vivo)
+    {
+        this.alive=vivo;
+    }
+    public boolean getAlive()
+    {
+        return this.alive;
+    }
     public void setVisite(long k)
     {this.visite=k;
     }
