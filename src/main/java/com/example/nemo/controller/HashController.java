@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.example.nemo.supports.ResponseMessage;
 
+import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +36,8 @@ public class HashController {
             return new ResponseEntity<>(new ResponseMessage("Id not found"), HttpStatus.OK);
         return new ResponseEntity<>(hash,HttpStatus.OK);
     }
+
+    @RolesAllowed("admin")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity deleteHash(@PathVariable("id") String id){
         hashService.deleteHash(id);
@@ -42,7 +45,7 @@ public class HashController {
     }
 
 
-
+    @RolesAllowed("admin")
     @CrossOrigin("http://localhost:4200")
     @GetMapping
     public List<HashEntity> getAll(){

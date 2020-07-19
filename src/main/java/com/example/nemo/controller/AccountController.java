@@ -11,6 +11,7 @@ import com.example.nemo.supports.ResponseMessage;
 
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 
+import org.keycloak.representations.AccessToken;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.HttpStatus;
@@ -27,7 +28,10 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/users")
+@CrossOrigin(origins = "*")
+
 public class AccountController {
+
     @Autowired
     private HashService hashService;
     @Autowired
@@ -42,6 +46,8 @@ public class AccountController {
         KeycloakAuthenticationToken principal = (KeycloakAuthenticationToken) request.getUserPrincipal();
         //String userId = principal.getAccount().getKeycloakSecurityContext().getIdToken().getSubject();
         UserEntity user = userService.getById(principal.getName());
+        if(user==null)
+            userService.addUser(principal);
         HashEntity hash = hashService.makeIdByUser(body.get("url"),user);
         userService.addHash(user,hash);
         return new ResponseEntity<>(hash,HttpStatus.OK);
@@ -57,16 +63,21 @@ public class AccountController {
             userService.addUser(principal);
         return hashService.getUserHashes(user);
     }
-    @CrossOrigin(origins = "*")
+
     @RolesAllowed("user")
     @GetMapping()
-    public ResponseEntity getById(HttpServletRequest request)
+    public HashMap<String,String> getById(HttpServletRequest request)
     {
         KeycloakAuthenticationToken principal = (KeycloakAuthenticationToken) request.getUserPrincipal();
         UserEntity user=userService.getById(principal.getName());
         if(user == null)
-            return new ResponseEntity<>(new ResponseMessage("Id not found"), HttpStatus.OK);
-        return new ResponseEntity<>(user,HttpStatus.OK);
+                userService.addUser(principal);
+        AccessToken accessToken = principal.getAccount().getKeycloakSecurityContext().getToken();
+        HashMap<String,String> utente = new HashMap<String,String>();
+        utente.put("email",accessToken.getEmail());
+        utente.put("firstname",accessToken.getName());
+        utente.put("username",principal.getName());
+        return utente;
     }
 
     @GetMapping("/size/{id}")
