@@ -2,11 +2,14 @@ package com.example.nemo.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.ResultCheckStyle;
+import org.hibernate.annotations.SQLDelete;
 
 import java.sql.Timestamp;
 import javax.persistence.*;
 
 @Entity
+//@SQLDelete(sql= "UPDATE hash  SET state= 'DELETED' WHERE id= ?", check= ResultCheckStyle.COUNT)
 @Table(name = "hash",schema = "public")
 public class HashEntity {
     @Basic
@@ -36,6 +39,9 @@ public class HashEntity {
     @Column(name = "creation_time")
     Timestamp creation;
 
+    @Basic
+    @Column(name = "alive")
+    boolean alive;
 
     public String getId() {
         return id;
