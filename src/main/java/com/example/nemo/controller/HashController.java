@@ -43,9 +43,9 @@ public class HashController {
 
 
 
-    @CrossOrigin("http://localhost:4200")
+    /*@CrossOrigin("http://localhost:4200")
     @GetMapping
-    public List<HashEntity> getAll(){
+   /* public List<HashEntity> getAll(){
         return hashService.showAllHash();
-    }
+    }*/
 }
