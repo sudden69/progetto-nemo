@@ -14,9 +14,9 @@ import java.util.Set;
 
 @Repository
 public interface HashRepository extends JpaRepository<HashEntity,String> {
-
+    //@Query("select e from #{#HashEntity} e where e.alive=false")
     HashEntity findByUrl (String url);
-    Set<HashEntity> findByBuyer(UserEntity user);
+    List <HashEntity> findByBuyer(UserEntity user);
     boolean existsByIdAndBuyerNot(String id,UserEntity user);
     HashEntity findByUrlAndBuyer(String url, UserEntity user);
     boolean existsByShUrl(String shUrl);

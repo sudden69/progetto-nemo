@@ -2,11 +2,14 @@ package com.example.nemo.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.ResultCheckStyle;
+import org.hibernate.annotations.SQLDelete;
 
 import java.sql.Timestamp;
 import javax.persistence.*;
 
 @Entity
+//@SQLDelete(sql= "UPDATE hash  SET state= 'DELETED' WHERE id= ?", check= ResultCheckStyle.COUNT)
 @Table(name = "hash",schema = "public")
 public class HashEntity {
     @Basic
@@ -18,7 +21,7 @@ public class HashEntity {
     private String id;
 
     @Basic
-    @Column(name = "shurl")
+    @Column(name = "shurl", unique = true)
     private String shUrl;
 
     @Basic
@@ -36,6 +39,13 @@ public class HashEntity {
     @Column(name = "creation_time")
     Timestamp creation;
 
+    @Basic
+    @Column(name = "alive")
+    boolean alive;
+
+    @Basic
+    @Column(name ="customized")
+    boolean customized;
 
     public String getId() {
         return id;
@@ -55,6 +65,14 @@ public class HashEntity {
         this.buyer=buyer;
     }
 
+    public void setAlive(boolean vivo)
+    {
+        this.alive=vivo;
+    }
+    public boolean getAlive()
+    {
+        return this.alive;
+    }
     public void setVisite(long k)
     {this.visite=k;
     }

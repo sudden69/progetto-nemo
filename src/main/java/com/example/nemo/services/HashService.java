@@ -11,10 +11,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import com.example.nemo.repositories.HashRepository;
+import org.springframework.transaction.annotation.Isolation;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
-import javax.transaction.Transactional;
+//import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -39,6 +44,13 @@ public class HashService {
         if(duration>1800)
             return true;
         return false;
+    }
+    public void setAlive(HashEntity hash)
+    {hash.setAlive(shouldBeKilled(Timestamp.valueOf(LocalDateTime.now()),hash));
+     hashRepository.save(hash);
+    }
+    public boolean getAlive(HashEntity hash)
+    {return hash.getAlive();
     }
     //mappa massimi hashing raggiunti
     private static HashMap<Integer,Integer> hashing=new HashMap<Integer, Integer>();
@@ -162,6 +174,7 @@ public class HashService {
     ho accomunato questo metodo per la creazione esclusiva dell'hash delegando poi ai due metodi makeIdNoUser e makeIdByUser il controllo
     dell'eventuale esistenza dell'hash
     */ /* bravo */
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public HashEntity makeId(String url)
     {
 
@@ -256,8 +269,16 @@ public class HashService {
     }
     //convertono l'id in base 64 o personalizzato
 
+    //importante
     public boolean setCustomShUrl(HashEntity hash,String custom)
-    { if(hashRepository.existsByShUrl(custom))
+    {   try
+        {
+          int k=Integer.parseInt(String.valueOf(Base64.getUrlDecoder().decode(custom.getBytes())));
+          return false;
+        }
+        catch(Exception e){}
+
+        if(hashRepository.existsByShUrl(custom))
         return false;
      hash.setShUrl(custom);
      return true;
@@ -272,18 +293,26 @@ public class HashService {
     {String temp=hash.getShUrl();
      return temp.length();
     }
+
     public void deleteHash(String id){
         hashRepository.deleteById(id);
     }
 
+
     public HashEntity findHashbyShUrl(String hash) {
         return hashRepository.findByShUrl(hash);
     }
-    @Transactional
+    @Transactional( isolation = Isolation.SERIALIZABLE)
     public void incrementaVisite(HashEntity hashEntity){
         long visite = hashEntity.getVisite();
         hashEntity.setVisite(visite+1);
         hashRepository.save(hashEntity);
     }
 
+    public void refresh( String id)
+    {List <HashEntity> lista=hashRepository.findByBuyer(userRepository.findById(id));
+        Iterator <HashEntity> it=lista.iterator();
+        while(it.hasNext())
+            setAlive(it.next());
+    }
 }

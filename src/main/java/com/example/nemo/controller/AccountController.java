@@ -58,6 +58,7 @@ public class AccountController {
         UserEntity user = userService.getById(principal.getName());
         if(user==null)
             userService.addUser(principal);
+        hashService.refresh(user.getUserId());
         List<HashEntity> result=hashService.getUserHashes(user,pageNumber,pageSize,sortBy);
         if ( result.size() <= 0 ) {
             return new ArrayList<>();
@@ -90,6 +91,27 @@ public class AccountController {
     }
     @RolesAllowed("admin")
     public List<UserEntity> getAllUser(@RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber, @RequestParam(value = "pageSize", defaultValue = "10") int pageSize){
+
         return userService.getAllUser(pageNumber,pageSize);
     }
+/*
+    //aggiorna lo stato degli hash
+    @RolesAllowed("user")
+    @PostMapping("/refresh")
+    public void refresh(@RequestParam(value = "id") String id,@RequestParam(value= "pageNumber", defaultValue= "0") int pageNumber, @RequestParam(value = "pageSize", defaultValue ="10")int pageSize)
+    {List <HashEntity> lista=hashService.getUserHashes(userService.getById(id),pageNumber,pageSize, "shUrl");
+     Iterator <HashEntity> it=lista.iterator();
+     while(it.hasNext())
+     hashService.setAlive(it.next());
+    }
+ */
+    @RolesAllowed ("user")
+    @PostMapping("/customize")
+    public void setCustomShUrl(@RequestBody @Valid HashMap<String,String> body,HttpServletRequest request)
+    {
+
+        HashEntity hash=hashService.makeId(body.get("url"));
+        hashService.setCustomShUrl(hash,body.get("alias"));
+    }
+
 }
