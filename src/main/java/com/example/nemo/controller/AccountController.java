@@ -107,11 +107,16 @@ public class AccountController {
  */
     @RolesAllowed ("user")
     @PostMapping("/customize")
-    public void setCustomShUrl(@RequestBody @Valid HashMap<String,String> body,HttpServletRequest request)
+    public ResponseEntity setCustomShUrl(@RequestBody @Valid HashMap<String,String> body,HttpServletRequest request)
     {
-
-        HashEntity hash=hashService.makeId(body.get("url"));
+        KeycloakAuthenticationToken principal = (KeycloakAuthenticationToken) request.getUserPrincipal();
+        //String userId = principal.getAccount().getKeycloakSecurityContext().getIdToken().getSubject();
+        UserEntity user = userService.getById(principal.getName());
+        if(user==null)
+            userService.addUser(principal);
+        HashEntity hash=hashService.makeIdByUser(body.get("url"),user);
         hashService.setCustomShUrl(hash,body.get("alias"));
+        return new ResponseEntity<>(hash,HttpStatus.OK);
     }
 
 }

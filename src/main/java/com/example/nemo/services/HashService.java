@@ -41,16 +41,14 @@ public class HashService {
     { long creation= hashEntity.getCreation().getTime();
       long now=then.getTime();
       long duration=now-creation;
-        if(duration>1800)
+        if(duration>100000000)
             return true;
         return false;
     }
     public void setAlive(HashEntity hash)
-    {hash.setAlive(shouldBeKilled(Timestamp.valueOf(LocalDateTime.now()),hash));
-     hashRepository.save(hash);
-    }
-    public boolean getAlive(HashEntity hash)
-    {return hash.getAlive();
+    {
+        hash.setAlive(!shouldBeKilled(Timestamp.valueOf(LocalDateTime.now()),hash));
+        hashRepository.save(hash);
     }
     //mappa massimi hashing raggiunti
     private static HashMap<Integer,Integer> hashing=new HashMap<Integer, Integer>();
@@ -156,11 +154,11 @@ public class HashService {
     public List <HashEntity> getUserHashes(UserEntity user, int pageNumber, int pageSize, String sortBy)
     {
         Pageable paging = PageRequest.of(pageNumber, pageSize,Sort.by(sortBy));
-        Page<HashEntity> pagedResult = hashRepository.findAllByBuyer(paging,user);
+        Page<HashEntity> pagedResult = hashRepository.findAllByBuyerAndAliveIsTrue(paging,user);
         if ( pagedResult.hasContent() ) {
             return pagedResult.getContent();
         }
-        return null;
+        return new ArrayList<>();
     }
 
     public HashEntity findUrlByHash(String id){
@@ -192,6 +190,8 @@ public class HashService {
         try
         {hashRepository.findById(String.valueOf(k)).get();
          hash.setCreation(Timestamp.valueOf(LocalDateTime.now()));
+         hash.setVisite(0);
+         hash.setAlive(true);
         }
         catch(Exception e)
         {
@@ -249,7 +249,7 @@ public class HashService {
        }
     }
 
-    @Transactional
+    @Transactional(readOnly = false)
     public HashEntity makeIdNoUser(String url){
 
         HashEntity hash = makeId(url);
@@ -257,10 +257,10 @@ public class HashService {
         return hash;
     }
 
-    @Transactional
+    @Transactional(readOnly = false)
     public HashEntity makeIdByUser(String url,UserEntity user)
     {
-        HashEntity hash = hashRepository.findByUrlAndBuyer(url,user);
+        HashEntity hash = hashRepository.findByUrlAndBuyerAndAliveIsTrue(url,user);
         if(hash != null) return hash;
         hash = makeId(url);
         hash.setBuyer(user);
@@ -269,7 +269,7 @@ public class HashService {
     }
     //convertono l'id in base 64 o personalizzato
 
-    //importante
+    @Transactional(readOnly = false)
     public boolean setCustomShUrl(HashEntity hash,String custom)
     {   try
         {
@@ -279,16 +279,17 @@ public class HashService {
         catch(Exception e){}
 
         if(hashRepository.existsByShUrl(custom))
-        return false;
+            return false;
      hash.setShUrl(custom);
+     hashRepository.save(hash);
      return true;
     }
-
+    @Transactional(readOnly = true)
     public int getSize(HashEntity hash)  //tinyurl lo fa, noi non possiamo essere da meno
     {String temp=hash.getUrl();
      return temp.length();
     }
-
+    @Transactional(readOnly = true)
     public int getShSize(HashEntity hash)
     {String temp=hash.getShUrl();
      return temp.length();
@@ -298,19 +299,20 @@ public class HashService {
         hashRepository.deleteById(id);
     }
 
-
+    @Transactional(readOnly = true)
     public HashEntity findHashbyShUrl(String hash) {
-        return hashRepository.findByShUrl(hash);
+        return hashRepository.findByShUrlAndAliveIsTrue(hash);
     }
+
     @Transactional( isolation = Isolation.SERIALIZABLE)
     public void incrementaVisite(HashEntity hashEntity){
         long visite = hashEntity.getVisite();
         hashEntity.setVisite(visite+1);
         hashRepository.save(hashEntity);
     }
-
+    @Transactional(readOnly = false)
     public void refresh( String id)
-    {List <HashEntity> lista=hashRepository.findByBuyer(userRepository.findById(id));
+    {List <HashEntity> lista=hashRepository.findByBuyerAndAliveIsTrue(userRepository.findById(id));
         Iterator <HashEntity> it=lista.iterator();
         while(it.hasNext())
             setAlive(it.next());

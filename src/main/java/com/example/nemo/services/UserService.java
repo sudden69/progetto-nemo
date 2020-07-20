@@ -24,17 +24,19 @@ import java.util.Set;
 public class UserService {
     @Autowired
     private UserRepository userRepository;
-
+    @Transactional(readOnly = false)
     public void addUser(KeycloakAuthenticationToken principal){
         UserEntity user = new UserEntity();
         user.setUserId(principal.getName());
         userRepository.save(user);
     }
+    @Transactional(readOnly = false)
     public void addHash(UserEntity user,HashEntity hash){
         Set<HashEntity> a = user.getHashes();
         a.add(hash);
         user.setHashes(a);
     }
+    @Transactional(readOnly = true)
     public HashMap<String,String> getUserInfo(KeycloakAuthenticationToken principal, AccessToken accessToken){
         HashMap<String,String> utente = new HashMap<String,String>();
         utente.put("email",accessToken.getEmail());
@@ -42,12 +44,13 @@ public class UserService {
         utente.put("username",principal.getName());
         return utente;
     }
-    @Transactional (readOnly= false)
+    @Transactional(readOnly = true)
     public UserEntity getById(String id)
     {
         UserEntity user = userRepository.findById(id);
         return user;
     }
+    @Transactional(readOnly = true)
     public List<UserEntity> getAllUser(int pageNumber, int pageSize){
         Pageable paging = PageRequest.of(pageNumber, pageSize);
         Page<UserEntity> pagedResult = userRepository.findAll(paging);

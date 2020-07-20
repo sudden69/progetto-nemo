@@ -37,12 +37,6 @@ public class HashController {
             return new ResponseEntity<>(new ResponseMessage("Id not found"), HttpStatus.OK);
         return new ResponseEntity<>(hash,HttpStatus.OK);
     }
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity deleteHash(@PathVariable("id") String id){
-        hashService.deleteHash(id);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
 
     @RolesAllowed("admin")
     @CrossOrigin("http://localhost:4200")

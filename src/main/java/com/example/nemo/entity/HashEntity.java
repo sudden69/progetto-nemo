@@ -43,10 +43,6 @@ public class HashEntity {
     @Column(name = "alive")
     boolean alive;
 
-    @Basic
-    @Column(name ="customized")
-    boolean customized;
-
     public String getId() {
         return id;
     }
