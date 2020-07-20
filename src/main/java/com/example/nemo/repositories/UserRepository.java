@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+//NEMO
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Integer> {
     UserEntity findById(String user_id);

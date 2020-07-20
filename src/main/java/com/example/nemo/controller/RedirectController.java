@@ -12,6 +12,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
 
+//NEMO
 @RestController
 @RequestMapping("")
 @CrossOrigin("*")

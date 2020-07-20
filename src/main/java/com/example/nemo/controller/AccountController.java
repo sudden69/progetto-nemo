@@ -27,6 +27,7 @@ import java.util.*;
 @RequestMapping("/users")
 @CrossOrigin(origins = "*")
 
+//NEMO
 public class AccountController {
 
     @Autowired

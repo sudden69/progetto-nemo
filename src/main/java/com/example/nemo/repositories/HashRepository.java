@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 
+//NEMO
 @Repository
 public interface HashRepository extends JpaRepository<HashEntity,String> {
     List <HashEntity> findByBuyerAndAliveIsTrue(UserEntity user);

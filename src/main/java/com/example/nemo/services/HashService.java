@@ -27,6 +27,7 @@ import java.util.*;
 import static java.lang.Math.abs;
 import static java.lang.Math.random;
 
+//NEMO
 @Service
 public class HashService {
     @Autowired
@@ -253,6 +254,8 @@ public class HashService {
     public HashEntity makeIdNoUser(String url){
 
         HashEntity hash = makeId(url);
+        hash.setAlive(true);
+        hash.setVisite(0);
         addUrl(hash);
         return hash;
     }
@@ -264,6 +267,7 @@ public class HashService {
         if(hash != null) return hash;
         hash = makeId(url);
         hash.setBuyer(user);
+        hash.setAlive(true);
         addUrl(hash);
         return hash;
     }

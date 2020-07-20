@@ -8,6 +8,7 @@ import org.hibernate.annotations.SQLDelete;
 import java.sql.Timestamp;
 import javax.persistence.*;
 
+//NEMO
 @Entity
 //@SQLDelete(sql= "UPDATE hash  SET state= 'DELETED' WHERE id= ?", check= ResultCheckStyle.COUNT)
 @Table(name = "hash",schema = "public")
@@ -61,9 +62,9 @@ public class HashEntity {
         this.buyer=buyer;
     }
 
-    public void setAlive(boolean vivo)
+    public void setAlive(boolean alive)
     {
-        this.alive=vivo;
+        this.alive=alive;
     }
     public boolean getAlive()
     {
