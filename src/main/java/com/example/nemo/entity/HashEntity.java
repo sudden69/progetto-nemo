@@ -21,7 +21,7 @@ public class HashEntity {
     private String id;
 
     @Basic
-    @Column(name = "shurl")
+    @Column(name = "shurl", unique = true)
     private String shUrl;
 
     @Basic
@@ -42,6 +42,10 @@ public class HashEntity {
     @Basic
     @Column(name = "alive")
     boolean alive;
+
+    @Basic
+    @Column(name ="customized")
+    boolean customized;
 
     public String getId() {
         return id;

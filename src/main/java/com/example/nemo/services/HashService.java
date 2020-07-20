@@ -17,6 +17,8 @@ import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 //import javax.transaction.Transactional;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -45,6 +47,7 @@ public class HashService {
     }
     public void setAlive(HashEntity hash)
     {hash.setAlive(shouldBeKilled(Timestamp.valueOf(LocalDateTime.now()),hash));
+     hashRepository.save(hash);
     }
     public boolean getAlive(HashEntity hash)
     {return hash.getAlive();
@@ -306,4 +309,10 @@ public class HashService {
         hashRepository.save(hashEntity);
     }
 
+    public void refresh( String id)
+    {List <HashEntity> lista=hashRepository.findByBuyer(userRepository.findById(id));
+        Iterator <HashEntity> it=lista.iterator();
+        while(it.hasNext())
+            setAlive(it.next());
+    }
 }
